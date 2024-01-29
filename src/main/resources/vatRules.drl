@@ -1,0 +1,42 @@
+package com.example
+
+import com.test.Transaction;
+
+// Define global variables or imports if needed
+
+// Rules for vat_rate
+rule "VAT Rate PTC_A"
+    when
+        transaction: Transaction(asinCode == "PTC_A", $asinCode : asinCode, categoryCode >= 0 && categoryCode <= 5, $categoryCode : categoryCode)
+    then
+        transaction.setVatRate(8);
+end
+
+rule "VAT Rate PTC_B"
+    when
+        transaction: Transaction(asinCode == "PTC_B", $asinCode : asinCode, categoryCode > 5 && categoryCode <= 10, $categoryCode : categoryCode)
+    then
+        transaction.setVatRate(5);
+end
+
+rule "VAT Rate PTC_C"
+    when
+        transaction: Transaction(asinCode == "PTC_C", $asinCode : asinCode, categoryCode > 10 && categoryCode <= 15, $categoryCode : categoryCode)
+    then
+        transaction.setVatRate(0);
+end
+
+// Rules for status
+rule "Status System Excluded"
+    when
+        transaction: Transaction(vatRate == 0)
+    then
+        transaction.setStatus("SYSTEM_EXCLUDED");
+end
+
+rule "Status Review"
+    when
+        transaction: Transaction(vatRate != null)
+    then
+        transaction.setStatus("REVIEW");
+end
